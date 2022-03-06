@@ -247,5 +247,20 @@
     "YE": "Yemen",
     "ZA": "South Africa",
     "ZM": "Zambia",
-    "ZW": "Zimbabwe"
+    "ZW": "Zimbabwe",
+    "AME_C_CRB": "Central America and Caribbean",
+    "AFR_OTH": "Other African countries",
+    "AFR_N": "Northern Africa",
+    "AME_N": "Northern America",
+    "EUR_OTH": "Other European countries",
+    "EXT_EU_NAL": "Extra-EU, not allocated",
+    "EXT_EU": "Extra-EU",
+    "INT_EU_NAL": "Intra-EU, not allocated",
+    "INT_EU": "Intra-EU",
+    "ASI_NME": "Near and Middle East Asia",
+    "ASI_OTH": "Other Asian countries",
+    "OCE_PLR": "Oceania and southern polar regions",
+    "WORLD": "All countries of the world",
+    "CN_X_HK": "China except Hong Kong",
+    "AME_S": "South America"
 }

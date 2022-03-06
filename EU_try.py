@@ -28,6 +28,17 @@ df2.iloc[:,5].replace({"UK":"GB","EL":"GR"}, inplace=True)
 df2 = df2[df2.iloc[:,5]!="XK"]
 df2['ISO3'] = df2.iloc[:,5].map(iso_to_iso)
 df2['name'] = df2.iloc[:,5].map(iso_to_name)
+
+data = eurostat.get_data_df('ext_tec03', flags=False)
+data.rename({r'geo\time': 'iso2'}, axis='columns', inplace=True)
+data['iso2'].replace({"UK":"GB","EL":"GR"}, inplace=True)
+data['partner'].replace({"UK":"GB","EL":"GR"}, inplace=True)
+data = data[data['iso2']!="XK"]
+data['ISO3'] = data['iso2'].map(iso_to_iso)
+data['name'] = data['iso2'].map(iso_to_name)
+data['ISO3_partner'] = data['partner'].map(iso_to_iso)
+data['name_partner'] = data['partner'].map(iso_to_name)
+data = data[(data['partner']!="WORLD")&(data['partner']!="EXT_EU")&(data['partner']!="INT_EU")&(data['partner']!="EUR_OTH")&(data['partner']!="INT_EU_NAL")&(data['partner']!="EXT_EU_NAL")]
 #Lists-----------------------------------------------------------------------------------------------------------------
 Countries=[]
 for i in df2.iloc[:,5].unique():
@@ -72,6 +83,21 @@ html.Pre(children="Main trading target countries", style={"fontSize":"150%"}),
                 options=[
                 {"label":x,"value":x} for x in Countries],
                 multi=False,
+                value="Austria",
+                style={'width': '40%'},
+                persistence=True),
+dcc.Dropdown(id="Year2",
+                options=[
+                {"label":"2012","value":2012},
+                {"label":"2013","value":2013},                
+                {"label":"2014","value":2014},
+                {"label":"2015","value":2015},
+                {"label":"2016","value":2016},                
+                {"label":"2017","value":2017},
+                {"label":"2018","value":2018},
+                {"label":"2019","value":2019},
+                {"label":"2020","value":2020}],
+                multi=False,
                 value=2012,
                 style={'width': '40%'}),
 html.Br(),
@@ -90,10 +116,11 @@ html.Div(children=[
 
     [Input(component_id='Year',component_property='value'),
     Input(component_id='Country',component_property='value'),
-    Input(component_id='ImpExp',component_property='value')]
+    Input(component_id='ImpExp',component_property='value'),
+    Input(component_id='Year2',component_property='value')]
 )
 
-def update_graph(year_slctd,country_slctd, impexp):
+def update_graph(year_slctd,country_slctd, impexp,year2):
         
 #    dff=df_map.copy()
 #    dff=dff[dff['Year'] == year_slctd]
@@ -136,30 +163,31 @@ def update_graph(year_slctd,country_slctd, impexp):
         color_discrete_sequence=['green'], 
         title= 'Ranking (thousand Euro)',
         template='plotly_white')
-
+    data_exp = data[(data['stk_flow']=="EXP")&(data['nace_r2']==nace_r2)&(data['unit']=="THS_EUR")&(data['name']==country_slctd)]
+    data_exp.sort_values(by=[year2], axis=0, ascending=False, inplace=True)
     fig3 = px.histogram(
-        df2_2[df2_2['stk_flow'] =='EXP'], 
+        data_exp,
         width=Width,
         height=Height,
-        x='name', 
-        y=year_slctd,
-        labels={'OBS_VALUE':'Thousands Euro'}, 
-        color_discrete_sequence=['green'],
-        color_discrete_map = {country_slctd: "red"}, 
+        x='name_partner', 
+        y=year2,
+        labels={year2:'exports (Euros)'}, 
+        color_discrete_sequence=['green'], 
         title= 'Exporting countries',
         template='plotly_white')
-
+    data_imp = data[(data['stk_flow']=="IMP")&(data['nace_r2']==nace_r2)&(data['unit']=="THS_EUR")&(data['name']==country_slctd)]
+    data_imp.sort_values(by=[year2], axis=0, ascending=False, inplace=True)
     fig4 = px.histogram(
-        df2_2[df2_2['stk_flow'] =='IMP'], 
+        data_imp, 
         width=Width,
         height=Height,
-        x='name', 
-        y=year_slctd,
-        labels={'OBS_VALUE':'Thousands Euro'}, 
+        x='name_partner', 
+        y=year2,
+        labels={year2:'import (Euros)'}, 
         color_discrete_sequence=['green'], 
-        color_discrete_map = {country_slctd: "red"},
-        title= 'Importing countries ',
+        title= 'Importing countries',
         template='plotly_white')
+        
 
 
     return fig_map,fig2,fig3,fig4
