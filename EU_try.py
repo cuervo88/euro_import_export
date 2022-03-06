@@ -24,6 +24,7 @@ nace_dict = json.load(open("nace.json","r"))
 iso_to_iso = json.load(open("iso_to_iso.json","r"))
 iso_to_name = json.load(open("iso_to_name.json","r"))
 df2   =eurostat.get_data_df("ext_tec01", flags=False)
+df2.rename({r'geo\time': 'iso2'}, axis='columns', inplace=True)
 df2.iloc[:,5].replace({"UK":"GB","EL":"GR"}, inplace=True)
 df2 = df2[df2.iloc[:,5]!="XK"]
 df2['ISO3'] = df2.iloc[:,5].map(iso_to_iso)
@@ -50,8 +51,13 @@ Height= 800
 
 app = dash.Dash(external_stylesheets=[dbc.themes.JOURNAL])
 #App layout-----------------------------------------------------------------------------------------------------------------
-app.layout = html.Div([
-    html.H1("EU Trading Dashboard", style={'text-align':'center'}),
+app.layout = html.Div([ html.Div([
+    html.H1("EU Trading Dashboard", style={'text-align':'center'})]),
+    html.H4("Data obtained from Eurostat", style={'text-align':'left','color':"#1d00bf"}),
+    html.Img(
+                    src="https://upload.wikimedia.org/wikipedia/commons/f/f6/Eurostat_Newlogo.png",
+                    className='two columns',
+                ),
     html.Br(),
 html.Pre(children="EU trading by year", style={"fontSize":"150%"}),
 
@@ -70,14 +76,15 @@ html.Pre(children="EU trading by year", style={"fontSize":"150%"}),
                 value=2012,
                 style={'width': '40%'}),
         dcc.RadioItems(id="ImpExp",
-        options = [{'label':'Import', 'value':'IMP'},{'label':'Export','value':'EXP'}], 
+        options = [{'label':'Import', 'value':'IMP'},{'label':'Export','value':'EXP'}, {'label':'Revenue','value':'REV'}], 
         value= 'IMP'),
 html.Br(),
-html.Div(children=[  
-                dcc.Graph(id='trading_map', figure={}),
+html.Div(children=[html.Div([  
+                dcc.Graph(id='trading_map', figure={})]),
                 dcc.Graph(id='ranking_chart', figure={})],
             style={'display': 'flex', 'flex-direction': 'row','align':'center'}),
 html.Br(),
+html.Div([
 html.Pre(children="Main trading target countries", style={"fontSize":"150%"}),
  dcc.Dropdown(id="Country",
                 options=[
@@ -105,7 +112,7 @@ html.Div(children=[
                 dcc.Graph(id='IMP_chart', figure={}),
                 dcc.Graph(id='EXP_chart', figure={})],
             style={'display': 'flex', 'flex-direction': 'row','align':'center'}),
-    ])
+])])
 
 #Callback-----------------------------------------------------------------------------------------------------------------
 @app.callback(
@@ -135,22 +142,70 @@ def update_graph(year_slctd,country_slctd, impexp,year2):
     nace_r2 = "TOTAL"
     partner = "WORLD"
     df2_2 = df2[(df2['unit']==unit)&(df2["sizeclas"] ==sizeclas)&(df2['partner'] ==partner)&(df2['nace_r2'] ==nace_r2)]
-    df2_2.sort_values(by=[year_slctd], axis=0, ascending=False, inplace=True)
-    fig_map= px.choropleth(
-        data_frame=df2_2[df2_2['stk_flow'] ==impexp],
-        width=Width,
-        height=Height,
-        locationmode='ISO-3',
-        locations='ISO3',
-        title= 'Trading amount (thousand Euro)',
-        scope='europe',
-        color=year_slctd,
-        basemap_visible=True,
-        hover_data=['name',year_slctd],
-        color_continuous_scale=px.colors.sequential.Greens,
-        #labels={'Name':'Thousands Euro'},
-        template='seaborn'
-    )
+    if impexp == "REV":
+        df2_2.sort_values(by=["iso2","stk_flow"], axis=0, ascending=False, inplace=True)
+        df2_2_imp = df2_2[df2_2["stk_flow"]=="IMP"]
+        df2_2_exp = df2_2[df2_2["stk_flow"]=="EXP"]
+        d3_4 = []
+        for i in range(34):
+            dict4 = {"unit":"THS_EUR","sizeclas":"TOTAL","stk_flow":"REV","nace_r2":"TOTAL","partner":"WORLD"}
+            dict4['iso2'] = df2_2_exp.iloc[i,5]
+            dict5  = dict(df2_2_exp.iloc[i,6:15] - df2_2_imp.iloc[i,6:15])
+            dict4 = dict4 | dict5
+            dict4["ISO3"] = df2_2_exp.iloc[i,15]
+            dict4["name"] = df2_2_exp.iloc[i,16]
+            d3_4.append(dict4)
+        df3_3 = pd.DataFrame.from_dict(d3_4)
+        #df3_3.sort_values(by=[year_slctd], axis=0, ascending=False, inplace=True)
+        fig_map= px.choropleth(df3_3,
+            width=Width,
+            height=Height,
+            locationmode='ISO-3',
+            locations='ISO3',
+            title= 'Trading amount (thousand Euro)',
+            scope='europe',
+            color=year_slctd,
+            basemap_visible=True,
+            hover_data=['name',year_slctd],
+            color_continuous_scale=px.colors.diverging.PRGn,
+            color_continuous_midpoint=0,
+            #labels={'Name':'Thousands Euro'},
+            template='seaborn'
+        )
+    elif impexp == "EXP":
+        df2_2.sort_values(by=[year_slctd], axis=0, ascending=False, inplace=True)
+        fig_map= px.choropleth(
+            data_frame=df2_2[df2_2['stk_flow'] ==impexp],
+            width=Width,
+            height=Height,
+            locationmode='ISO-3',
+            locations='ISO3',
+            title= 'Trading amount (thousand Euro)',
+            scope='europe',
+            color=year_slctd,
+            basemap_visible=True,
+            hover_data=['name',year_slctd],
+            color_continuous_scale=px.colors.sequential.Greens,
+            #labels={'Name':'Thousands Euro'},
+            template='seaborn'
+        )
+    else:
+        df2_2.sort_values(by=[year_slctd], axis=0, ascending=False, inplace=True)
+        fig_map= px.choropleth(
+            data_frame=df2_2[df2_2['stk_flow'] ==impexp],
+            width=Width,
+            height=Height,
+            locationmode='ISO-3',
+            locations='ISO3',
+            title= 'Trading amount (thousand Euro)',
+            scope='europe',
+            color=year_slctd,
+            basemap_visible=True,
+            hover_data=['name',year_slctd],
+            color_continuous_scale=px.colors.sequential.BuPu,
+            #labels={'Name':'Thousands Euro'},
+            template='seaborn'
+        )
 
     # Bar figures--------------------------------------------------------
     fig2 = px.histogram(
@@ -184,7 +239,7 @@ def update_graph(year_slctd,country_slctd, impexp,year2):
         x='name_partner', 
         y=year2,
         labels={year2:'import (Euros)'}, 
-        color_discrete_sequence=['green'], 
+        color_discrete_sequence=px.colors.qualitative.Bold, 
         title= 'Importing countries',
         template='plotly_white')
         
