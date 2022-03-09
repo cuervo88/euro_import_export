@@ -40,6 +40,7 @@ data['name'] = data['iso2'].map(iso_to_name)
 data['ISO3_partner'] = data['partner'].map(iso_to_iso)
 data['name_partner'] = data['partner'].map(iso_to_name)
 data = data[(data['partner']!="WORLD")&(data['partner']!="EXT_EU")&(data['partner']!="INT_EU")&(data['partner']!="EUR_OTH")&(data['partner']!="INT_EU_NAL")&(data['partner']!="EXT_EU_NAL")]
+
 #Lists-----------------------------------------------------------------------------------------------------------------
 Countries=[]
 for i in df2.iloc[:,5].unique():
@@ -127,14 +128,8 @@ html.Div(children=[
     Input(component_id='Year2',component_property='value')]
 )
 
-def update_graph(year_slctd,country_slctd, impexp,year2):
-        
-#    dff=df_map.copy()
-#    dff=dff[dff['Year'] == year_slctd]
-#   
-#   dff2=df_map.copy()
-#   dff2=dff2[dff2['Country'] == country_slctd]
-      
+def update_graph(year_slctd,country_slctd, impexp,year_slctd2):
+         
     # choropleth figure----------------------------------------------
     unit = "THS_EUR"
     sizeclas = "TOTAL"
@@ -208,7 +203,42 @@ def update_graph(year_slctd,country_slctd, impexp,year2):
         )
 
     # Bar figures--------------------------------------------------------
-    fig2 = px.histogram(
+    if impexp == "REV":
+        df2_2.sort_values(by=[year_slctd], axis=0, ascending=False, inplace=True)
+        df2_2_imp = df2_2[df2_2["stk_flow"]=="IMP"]
+        df2_2_exp = df2_2[df2_2["stk_flow"]=="EXP"]
+        d3_4 = []
+        for i in range(34):
+            dict4 = {"unit":"THS_EUR","sizeclas":"TOTAL","stk_flow":"REV","nace_r2":"TOTAL","partner":"WORLD"}
+            dict4['iso2'] = df2_2_exp.iloc[i,5]
+            dict5  = dict(df2_2_exp.iloc[i,6:15] - df2_2_imp.iloc[i,6:15])
+            dict4 = dict4 | dict5
+            dict4["ISO3"] = df2_2_exp.iloc[i,15]
+            dict4["name"] = df2_2_exp.iloc[i,16]
+            d3_4.append(dict4)
+        df3_3 = pd.DataFrame.from_dict(d3_4)
+        
+        fig2 = px.bar(
+        df3_3[df3_3["stk_flow"]==impexp],
+        width=Width,
+        height=Height,
+        x='name', 
+        y=year_slctd,
+        color=year_slctd,
+        labels={year_slctd:'Thousands Euro'}, 
+        color_continuous_scale=px.colors.diverging.PRGn,
+        color_continuous_midpoint=0, 
+        title= 'Ranking (thousand Euro)',
+        template='plotly_white'
+        )
+
+    elif impexp == "EXP":
+
+        df2_2.sort_values(by=[year_slctd], axis=0, ascending=False, inplace=True)
+        # data_exp = data[(data['stk_flow']=="EXP")&(data['nace_r2']==nace_r2)&(data['unit']=="THS_EUR")&(data['name']==country_slctd)]
+        # data_exp.sort_values(by=[year2], axis=0, ascending=False, inplace=True)
+        
+        fig2 = px.histogram(
         df2_2[df2_2['stk_flow'] ==impexp],
         width=Width,
         height=Height,
@@ -216,34 +246,48 @@ def update_graph(year_slctd,country_slctd, impexp,year2):
         y=year_slctd,
         labels={year_slctd:'Thousands Euro'}, 
         color_discrete_sequence=['green'], 
-        title= 'Ranking (thousand Euro)',
-        template='plotly_white')
-    data_exp = data[(data['stk_flow']=="EXP")&(data['nace_r2']==nace_r2)&(data['unit']=="THS_EUR")&(data['name']==country_slctd)]
-    data_exp.sort_values(by=[year2], axis=0, ascending=False, inplace=True)
-    fig3 = px.histogram(
-        data_exp,
-        width=Width,
-        height=Height,
-        x='name_partner', 
-        y=year2,
-        labels={year2:'exports (Euros)'}, 
-        color_discrete_sequence=['green'], 
         title= 'Exporting countries',
         template='plotly_white')
-    data_imp = data[(data['stk_flow']=="IMP")&(data['nace_r2']==nace_r2)&(data['unit']=="THS_EUR")&(data['name']==country_slctd)]
-    data_imp.sort_values(by=[year2], axis=0, ascending=False, inplace=True)
-    fig4 = px.histogram(
-        data_imp, 
+    else:
+        df2_2.sort_values(by=[year_slctd], axis=0, ascending=False, inplace=True)
+
+    # data_imp = data[(data['stk_flow']=="IMP")&(data['nace_r2']==nace_r2)&(data['unit']=="THS_EUR")&(data['name']==country_slctd)]
+    # data_imp.sort_values(by=[year2], axis=0, ascending=False, inplace=True)
+        fig2 = px.histogram(
+        df2_2[df2_2['stk_flow'] ==impexp], 
         width=Width,
         height=Height,
-        x='name_partner', 
-        y=year2,
-        labels={year2:'import (Euros)'}, 
-        color_discrete_sequence=px.colors.qualitative.Bold, 
+        x='name', 
+        y=year_slctd,
+        labels={year_slctd:'Thousands Euro'}, 
+        color_discrete_sequence=['purple'], 
         title= 'Importing countries',
         template='plotly_white')
-        
+            
+    data2=data[data['name']==country_slctd]    
+    data2.sort_values(by=[year_slctd2], axis=0, ascending=False, inplace=True)
 
+    fig3 = px.histogram(
+    data2[data2["stk_flow"]=='EXP'],
+    width=Width,
+    height=Height,
+    x='name_partner', 
+    y=year_slctd2,
+    labels={'2012':'exports (Euros)'}, 
+    color_discrete_sequence=['green'], 
+    title= 'Exporting countries',
+    template='plotly_white')
+
+    fig4 = px.histogram(
+    data2[data2["stk_flow"]=='IMP'], 
+    width=Width,
+    height=Height,
+    x='name_partner', 
+    y=year_slctd2,
+    labels={'2012':'imports (Euros)'}, 
+    color_discrete_sequence=['purple'], 
+    title= 'Importing countries ',
+    template='plotly_white')
 
     return fig_map,fig2,fig3,fig4
 
