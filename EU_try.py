@@ -54,12 +54,13 @@ app = dash.Dash(external_stylesheets=[dbc.themes.JOURNAL])
 #App layout-----------------------------------------------------------------------------------------------------------------
 app.layout = html.Div([ html.Div([
     html.H1("EU Trading Dashboard", style={'text-align':'center'})]),
-    html.H4("Data obtained from Eurostat", style={'text-align':'left','color':"#1d00bf"}),
-    html.Img(
+    html.Div([
+        html.A([html.Img(
                     src="https://upload.wikimedia.org/wikipedia/commons/f/f6/Eurostat_Newlogo.png",
-                    className='two columns',
-                ),
-    html.Br(),
+                    className='eurostat',
+                )], href='https://ec.europa.eu/eurostat', target="_blank"),
+        html.H4("Data obtained from: ",className="euro_text"),
+    html.Br()],className='one.columns'),
 html.Pre(children="EU trading by year", style={"fontSize":"150%"}),
 
         dcc.Dropdown(id="Year",
