@@ -40,6 +40,7 @@ data['name'] = data['iso2'].map(iso_to_name)
 data['ISO3_partner'] = data['partner'].map(iso_to_iso)
 data['name_partner'] = data['partner'].map(iso_to_name)
 data = data[(data['partner']!="WORLD")&(data['partner']!="EXT_EU")&(data['partner']!="INT_EU")&(data['partner']!="EUR_OTH")&(data['partner']!="INT_EU_NAL")&(data['partner']!="EXT_EU_NAL")]
+
 #Lists-----------------------------------------------------------------------------------------------------------------
 Countries=[]
 for i in df2.iloc[:,5].unique():
@@ -73,15 +74,18 @@ tab_selected_style = {
     'padding': '6px'
 }
 #App layout-----------------------------------------------------------------------------------------------------------------
-app.layout = html.Div([ html.Div([
-    html.H1("EU Trading Dashboard", style={'text-align':'center'})]),
-    html.H4("Data obtained from Eurostat", style={'text-align':'left','color':"#1d00bf"}),
-    html.Img(
-                    src="https://upload.wikimedia.org/wikipedia/commons/f/f6/Eurostat_Newlogo.png",
-                    className='two columns',
-                ),
-    html.Br(),
-dcc.Tabs([
+app.layout = html.Div([ 
+              html.Div([
+                html.H1("EU Trading Dashboard", style={'text-align':'center'})]),
+              html.Div([
+                html.A([
+                  html.Img(src="https://upload.wikimedia.org/wikipedia/commons/f/f6/Eurostat_Newlogo.png", className='eurostat')
+                ], href='https://ec.europa.eu/eurostat', target="_blank"),
+                html.H4("Data obtained from: ",className="euro_text"),
+                html.Br()
+              ],className='one.columns'),
+            html.Br(),
+      dcc.Tabs([
         dcc.Tab(label='EU-country View',style=tab_style, selected_style=tab_selected_style, children=[
             html.Br(),
             html.Pre(children="EU trading by year", style={"fontSize":"150%"}),
@@ -143,7 +147,7 @@ dcc.Tabs([
 html.Br(),
 html.Br(),
 html.H2("Authors", style={'text-align':'center'}),
-dcc.Markdown('''#### Ignacio Cuervo Torre (@Cuervi) and Daniel Rodriguez gutierrez (@Dannyovi).''',style={'text-align':'center'}),
+dcc.Markdown('''#### Ignacio Cuervo (@cuervo88) and Daniel Rodriguez gutierrez (@Dannyovi).''',style={'text-align':'center'}),
 html.Br(),
 ])
 
@@ -248,6 +252,7 @@ def update_graph(year_slctd,country_slctd, impexp,year_slctd2):
             dict4["name"] = df2_2_exp.iloc[i,16]
             d3_4.append(dict4)
         df3_3 = pd.DataFrame.from_dict(d3_4)
+
         fig2 = px.bar(
         df3_3[df3_3["stk_flow"]==impexp],
         width=Width,
@@ -257,7 +262,9 @@ def update_graph(year_slctd,country_slctd, impexp,year_slctd2):
         color=year_slctd,
         labels={year_slctd:'Thousands Euro'}, 
         color_continuous_scale=px.colors.diverging.PRGn,
+
         color_continuous_midpoint=0,
+
         title= 'Ranking (thousand Euro)',
         template='plotly_white'
         )
@@ -265,6 +272,10 @@ def update_graph(year_slctd,country_slctd, impexp,year_slctd2):
     elif impexp == "EXP":
 
         df2_2.sort_values(by=[year_slctd], axis=0, ascending=False, inplace=True)
+
+        # data_exp = data[(data['stk_flow']=="EXP")&(data['nace_r2']==nace_r2)&(data['unit']=="THS_EUR")&(data['name']==country_slctd)]
+        # data_exp.sort_values(by=[year2], axis=0, ascending=False, inplace=True)
+
         
         fig2 = px.histogram(
         df2_2[df2_2['stk_flow'] ==impexp],
@@ -278,6 +289,10 @@ def update_graph(year_slctd,country_slctd, impexp,year_slctd2):
         template='plotly_white')
     else:
         df2_2.sort_values(by=[year_slctd], axis=0, ascending=False, inplace=True)
+
+
+    # data_imp = data[(data['stk_flow']=="IMP")&(data['nace_r2']==nace_r2)&(data['unit']=="THS_EUR")&(data['name']==country_slctd)]
+    # data_imp.sort_values(by=[year2], axis=0, ascending=False, inplace=True)
 
         fig2 = px.histogram(
         df2_2[df2_2['stk_flow'] ==impexp], 
