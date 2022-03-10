@@ -51,70 +51,105 @@ Height= 800
 #DATA-----------------------------------------------------------------------------------------------------------------
 
 app = dash.Dash(external_stylesheets=[dbc.themes.JOURNAL])
-#App layout-----------------------------------------------------------------------------------------------------------------
-app.layout = html.Div([ html.Div([
-    html.H1("EU Trading Dashboard", style={'text-align':'center'})]),
-    html.Div([
-        html.A([html.Img(
-                    src="https://upload.wikimedia.org/wikipedia/commons/f/f6/Eurostat_Newlogo.png",
-                    className='eurostat',
-                )], href='https://ec.europa.eu/eurostat', target="_blank"),
-        html.H4("Data obtained from: ",className="euro_text"),
-    html.Br()],className='one.columns'),
-html.Pre(children="EU trading by year", style={"fontSize":"150%"}),
 
-        dcc.Dropdown(id="Year",
-                options=[
-                {"label":"2012","value":2012},
-                {"label":"2013","value":2013},                
-                {"label":"2014","value":2014},
-                {"label":"2015","value":2015},
-                {"label":"2016","value":2016},                
-                {"label":"2017","value":2017},
-                {"label":"2018","value":2018},
-                {"label":"2019","value":2019},
-                {"label":"2020","value":2020}],
-                multi=False,
-                value=2012,
-                style={'width': '40%'}),
-        dcc.RadioItems(id="ImpExp",
-        options = [{'label':'Import', 'value':'IMP'},{'label':'Export','value':'EXP'}, {'label':'Revenue','value':'REV'}], 
-        value= 'IMP',style={'width': '40%'}),
+#Tabs Style-----------------------------------------------------------------------------------------------------------------
+tabs_styles = {
+    'height': '44px'
+}
+tab_style = {
+    'borderBottom': '1px solid #d6d6d6',
+    'padding': '6px',
+    'fontWeight': 'bold',
+    'font-size': '25px',
+    'color':'grey',
+}
+
+tab_selected_style = {
+    'borderTop': '1px solid #d6d6d6',
+    'borderBottom': '1px solid #d6d6d6',
+    'backgroundColor': '#119DFF',
+    'fontWeight': 'bold',
+    'font-size': '25px',
+    'color': 'white',
+    'padding': '6px'
+}
+#App layout-----------------------------------------------------------------------------------------------------------------
+app.layout = html.Div([ 
+              html.Div([
+                html.H1("EU Trading Dashboard", style={'text-align':'center'})]),
+              html.Div([
+                html.A([
+                  html.Img(src="https://upload.wikimedia.org/wikipedia/commons/f/f6/Eurostat_Newlogo.png", className='eurostat')
+                ], href='https://ec.europa.eu/eurostat', target="_blank"),
+                html.H4("Data obtained from: ",className="euro_text"),
+                html.Br()
+              ],className='one.columns'),
+            html.Br(),
+      dcc.Tabs([
+        dcc.Tab(label='EU-country View',style=tab_style, selected_style=tab_selected_style, children=[
+            html.Br(),
+            html.Pre(children="EU trading by year", style={"fontSize":"150%"}),
+
+                    dcc.Dropdown(id="Year",
+                            options=[
+                            {"label":"2012","value":2012},
+                            {"label":"2013","value":2013},                
+                            {"label":"2014","value":2014},
+                            {"label":"2015","value":2015},
+                            {"label":"2016","value":2016},                
+                            {"label":"2017","value":2017},
+                            {"label":"2018","value":2018},
+                            {"label":"2019","value":2019},
+                            {"label":"2020","value":2020}],
+                            multi=False,
+                            value=2012,
+                            style={'width': '40%'}),
+                    dcc.RadioItems(id="ImpExp",
+                    options = [{'label':'Import', 'value':'IMP'},{'label':'Export','value':'EXP'}, {'label':'Revenue','value':'REV'}], 
+                    value= 'IMP'),
+            html.Br(),
+            html.Div(children=[html.Div([  
+                            dcc.Graph(id='trading_map', figure={})]),
+                            dcc.Graph(id='ranking_chart', figure={})],
+                        style={'display': 'flex', 'flex-direction': 'row','align':'center'}),
+            html.Br(),
+            html.Div([
+            html.Pre(children="Main trading target countries", style={"fontSize":"150%"}),
+            dcc.Dropdown(id="Country",
+                            options=[
+                            {"label":x,"value":x} for x in Countries],
+                            multi=False,
+                            value="Austria",
+                            style={'width': '40%'},
+                            persistence=True),
+            dcc.Dropdown(id="Year2",
+                            options=[
+                            {"label":"2012","value":2012},
+                            {"label":"2013","value":2013},                
+                            {"label":"2014","value":2014},
+                            {"label":"2015","value":2015},
+                            {"label":"2016","value":2016},                
+                            {"label":"2017","value":2017},
+                            {"label":"2018","value":2018},
+                            {"label":"2019","value":2019},
+                            {"label":"2020","value":2020}],
+                            multi=False,
+                            value=2012,
+                            style={'width': '40%'}),
+            html.Br(),
+            html.Div(children=[  
+                            dcc.Graph(id='IMP_chart', figure={}),
+                            dcc.Graph(id='EXP_chart', figure={})],
+                        style={'display': 'flex', 'flex-direction': 'row','align':'center'})]),
+        ]),
+        dcc.Tab(label='Trading Product View',style=tab_style, selected_style=tab_selected_style, children=[]),
+    ]),
 html.Br(),
-html.Div(children=[html.Div([  
-                dcc.Graph(id='trading_map', figure={})]),
-                dcc.Graph(id='ranking_chart', figure={})],
-            style={'display': 'flex', 'flex-direction': 'row','align':'center'}),
 html.Br(),
-html.Div([
-html.Pre(children="Main trading target countries", style={"fontSize":"150%"}),
- dcc.Dropdown(id="Country",
-                options=[
-                {"label":x,"value":x} for x in Countries],
-                multi=False,
-                value="Austria",
-                style={'width': '40%'},
-                persistence=True),
-dcc.Dropdown(id="Year2",
-                options=[
-                {"label":"2012","value":2012},
-                {"label":"2013","value":2013},                
-                {"label":"2014","value":2014},
-                {"label":"2015","value":2015},
-                {"label":"2016","value":2016},                
-                {"label":"2017","value":2017},
-                {"label":"2018","value":2018},
-                {"label":"2019","value":2019},
-                {"label":"2020","value":2020}],
-                multi=False,
-                value=2012,
-                style={'width': '40%'}),
+html.H2("Authors", style={'text-align':'center'}),
+dcc.Markdown('''#### Ignacio Cuervo (@cuervo88) and Daniel Rodriguez gutierrez (@Dannyovi).''',style={'text-align':'center'}),
 html.Br(),
-html.Div(children=[  
-                dcc.Graph(id='IMP_chart', figure={}),
-                dcc.Graph(id='EXP_chart', figure={})],
-            style={'display': 'flex', 'flex-direction': 'row','align':'center'}),
-])])
+])
 
 #Callback-----------------------------------------------------------------------------------------------------------------
 @app.callback(
@@ -152,7 +187,6 @@ def update_graph(year_slctd,country_slctd, impexp,year_slctd2):
             dict4["name"] = df2_2_exp.iloc[i,16]
             d3_4.append(dict4)
         df3_3 = pd.DataFrame.from_dict(d3_4)
-        #df3_3.sort_values(by=[year_slctd], axis=0, ascending=False, inplace=True)
         fig_map= px.choropleth(df3_3,
             width=Width,
             height=Height,
@@ -181,7 +215,7 @@ def update_graph(year_slctd,country_slctd, impexp,year_slctd2):
             color=year_slctd,
             basemap_visible=True,
             hover_data=['name',year_slctd],
-            color_continuous_scale=px.colors.sequential.Greens,
+            color_continuous_scale=px.colors.sequential.BuGn,
             #labels={'Name':'Thousands Euro'},
             template='seaborn'
         )
@@ -218,7 +252,7 @@ def update_graph(year_slctd,country_slctd, impexp,year_slctd2):
             dict4["name"] = df2_2_exp.iloc[i,16]
             d3_4.append(dict4)
         df3_3 = pd.DataFrame.from_dict(d3_4)
-        
+
         fig2 = px.bar(
         df3_3[df3_3["stk_flow"]==impexp],
         width=Width,
@@ -228,7 +262,9 @@ def update_graph(year_slctd,country_slctd, impexp,year_slctd2):
         color=year_slctd,
         labels={year_slctd:'Thousands Euro'}, 
         color_continuous_scale=px.colors.diverging.PRGn,
-        color_continuous_midpoint=0, 
+
+        color_continuous_midpoint=0,
+
         title= 'Ranking (thousand Euro)',
         template='plotly_white'
         )
@@ -236,8 +272,10 @@ def update_graph(year_slctd,country_slctd, impexp,year_slctd2):
     elif impexp == "EXP":
 
         df2_2.sort_values(by=[year_slctd], axis=0, ascending=False, inplace=True)
+
         # data_exp = data[(data['stk_flow']=="EXP")&(data['nace_r2']==nace_r2)&(data['unit']=="THS_EUR")&(data['name']==country_slctd)]
         # data_exp.sort_values(by=[year2], axis=0, ascending=False, inplace=True)
+
         
         fig2 = px.histogram(
         df2_2[df2_2['stk_flow'] ==impexp],
@@ -252,8 +290,10 @@ def update_graph(year_slctd,country_slctd, impexp,year_slctd2):
     else:
         df2_2.sort_values(by=[year_slctd], axis=0, ascending=False, inplace=True)
 
+
     # data_imp = data[(data['stk_flow']=="IMP")&(data['nace_r2']==nace_r2)&(data['unit']=="THS_EUR")&(data['name']==country_slctd)]
     # data_imp.sort_values(by=[year2], axis=0, ascending=False, inplace=True)
+
         fig2 = px.histogram(
         df2_2[df2_2['stk_flow'] ==impexp], 
         width=Width,
@@ -295,5 +335,3 @@ def update_graph(year_slctd,country_slctd, impexp,year_slctd2):
 #-----------------------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
     app.run_server(debug=True)
-
-
