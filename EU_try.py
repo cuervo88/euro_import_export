@@ -23,6 +23,7 @@ import eurostat
 nace_dict = json.load(open("nace.json","r"))
 iso_to_iso = json.load(open("iso_to_iso.json","r"))
 iso_to_name = json.load(open("iso_to_name.json","r"))
+euro_map = json.load(open("europe.json","r"))
 df2   =eurostat.get_data_df("ext_tec01", flags=False)
 df2.rename({r'geo\time': 'iso2'}, axis='columns', inplace=True)
 df2.iloc[:,5].replace({"UK":"GB","EL":"GR"}, inplace=True)
@@ -102,7 +103,7 @@ app.layout = html.Div([
                             {"label":"2019","value":2019},
                             {"label":"2020","value":2020}],
                             multi=False,
-                            value=2012,
+                            value=2019,
                             style={'width': '40%'}),
                     dcc.RadioItems(id="ImpExp",
                     options = [{'label':'Import', 'value':'IMP'},{'label':'Export','value':'EXP'}, {'label':'Revenue','value':'REV'}], 
@@ -134,7 +135,7 @@ app.layout = html.Div([
                             {"label":"2019","value":2019},
                             {"label":"2020","value":2020}],
                             multi=False,
-                            value=2012,
+                            value=2019,
                             style={'width': '40%'}),
             html.Br(),
             html.Div(children=[  
@@ -187,54 +188,60 @@ def update_graph(year_slctd,country_slctd, impexp,year_slctd2):
             dict4["name"] = df2_2_exp.iloc[i,16]
             d3_4.append(dict4)
         df3_3 = pd.DataFrame.from_dict(d3_4)
-        fig_map= px.choropleth(df3_3,
+        fig_map= px.choropleth_mapbox(df3_3,
+            geojson=euro_map,
             width=Width,
             height=Height,
-            locationmode='ISO-3',
             locations='ISO3',
             title= 'Trading amount (thousand Euro)',
-            scope='europe',
+            center={"lat": 56, "lon": 10},
+            zoom=2.5,
+            opacity=0.9,
             color=year_slctd,
-            basemap_visible=True,
+            mapbox_style="carto-positron",
             hover_data=['name',year_slctd],
             color_continuous_scale=px.colors.diverging.PRGn,
             color_continuous_midpoint=0,
             #labels={'Name':'Thousands Euro'},
-            template='seaborn'
+            #template='seaborn'
         )
     elif impexp == "EXP":
         df2_2.sort_values(by=[year_slctd], axis=0, ascending=False, inplace=True)
-        fig_map= px.choropleth(
+        fig_map= px.choropleth_mapbox(
             data_frame=df2_2[df2_2['stk_flow'] ==impexp],
+            geojson=euro_map,
             width=Width,
             height=Height,
-            locationmode='ISO-3',
             locations='ISO3',
             title= 'Trading amount (thousand Euro)',
-            scope='europe',
+            center={"lat": 56, "lon": 10},
+            zoom=2.5,
+            opacity=0.9,
             color=year_slctd,
-            basemap_visible=True,
+            mapbox_style="carto-positron",
             hover_data=['name',year_slctd],
             color_continuous_scale=px.colors.sequential.BuGn,
             #labels={'Name':'Thousands Euro'},
-            template='seaborn'
+            #template='seaborn'
         )
     else:
         df2_2.sort_values(by=[year_slctd], axis=0, ascending=False, inplace=True)
-        fig_map= px.choropleth(
+        fig_map= px.choropleth_mapbox(
             data_frame=df2_2[df2_2['stk_flow'] ==impexp],
+            geojson=euro_map,
             width=Width,
             height=Height,
-            locationmode='ISO-3',
             locations='ISO3',
             title= 'Trading amount (thousand Euro)',
-            scope='europe',
+            center={"lat": 56, "lon": 10},
+            zoom=2.5,
+            opacity=0.9,
             color=year_slctd,
-            basemap_visible=True,
+            mapbox_style="carto-positron",
             hover_data=['name',year_slctd],
             color_continuous_scale=px.colors.sequential.BuPu,
             #labels={'Name':'Thousands Euro'},
-            template='seaborn'
+            #template='seaborn'
         )
 
     # Bar figures--------------------------------------------------------
