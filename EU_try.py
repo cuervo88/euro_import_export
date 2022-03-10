@@ -79,7 +79,7 @@ html.Pre(children="EU trading by year", style={"fontSize":"150%"}),
                 style={'width': '40%'}),
         dcc.RadioItems(id="ImpExp",
         options = [{'label':'Import', 'value':'IMP'},{'label':'Export','value':'EXP'}, {'label':'Revenue','value':'REV'}], 
-        value= 'IMP'),
+        value= 'IMP',style={'width': '40%'}),
 html.Br(),
 html.Div(children=[html.Div([  
                 dcc.Graph(id='trading_map', figure={})]),

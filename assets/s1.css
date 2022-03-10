@@ -18,6 +18,15 @@
 
 /* Grid
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
+.eurostat {
+  width: 120px;
+  height: 40px;
+  float: right;
+}
+.euro_text {
+  float: right;
+  color: #042BB8;
+}
 .container {
     position: relative;
     width: 100%;
