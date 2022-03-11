@@ -183,25 +183,16 @@ def update_graph(year_slctd,country_slctd, impexp,year_slctd2):
     # choropleth figure----------------------------------------------
     unit = "THS_EUR"
     sizeclas = "TOTAL"
-    stk_flow = 'EXP'
     nace_r2 = "TOTAL"
     partner = "WORLD"
     df2_2 = df2[(df2['unit']==unit)&(df2["sizeclas"] ==sizeclas)&(df2['partner'] ==partner)&(df2['nace_r2'] ==nace_r2)]
+    df2_pivot = df2_2.pivot(index=['ISO3',"name"], columns="stk_flow", values=year_slctd)
+    df2_pivot["REV"] = df2_pivot["EXP"]-df2_pivot["IMP"]
+    df2_pivot.reset_index(inplace=True)   
+    
     if impexp == "REV":
-        df2_2.sort_values(by=["iso2","stk_flow"], axis=0, ascending=False, inplace=True)
-        df2_2_imp = df2_2[df2_2["stk_flow"]=="IMP"]
-        df2_2_exp = df2_2[df2_2["stk_flow"]=="EXP"]
-        d3_4 = []
-        for i in range(34):
-            dict4 = {"unit":"THS_EUR","sizeclas":"TOTAL","stk_flow":"REV","nace_r2":"TOTAL","partner":"WORLD"}
-            dict4['iso2'] = df2_2_exp.iloc[i,5]
-            dict5  = dict(df2_2_exp.iloc[i,6:15] - df2_2_imp.iloc[i,6:15])
-            dict4 = dict4 | dict5
-            dict4["ISO3"] = df2_2_exp.iloc[i,15]
-            dict4["name"] = df2_2_exp.iloc[i,16]
-            d3_4.append(dict4)
-        df3_3 = pd.DataFrame.from_dict(d3_4)
-        fig_map= px.choropleth_mapbox(df3_3,
+        
+        fig_map= px.choropleth_mapbox(df2_pivot,
             geojson=euro_map,
             width=Width,
             height=Height,
@@ -210,18 +201,18 @@ def update_graph(year_slctd,country_slctd, impexp,year_slctd2):
             center={"lat": 56, "lon": 10},
             zoom=2.5,
             opacity=0.9,
-            color=year_slctd,
+            color=impexp,
             mapbox_style="carto-positron",
-            hover_data=['name',year_slctd],
+            hover_data=['name',impexp],
             color_continuous_scale=px.colors.diverging.PRGn,
             color_continuous_midpoint=0,
             #labels={'Name':'Thousands Euro'},
             #template='seaborn'
         )
     elif impexp == "EXP":
-        df2_2.sort_values(by=[year_slctd], axis=0, ascending=False, inplace=True)
+        df2_pivot.sort_values(by=[impexp], axis=0, ascending=False, inplace=True)
         fig_map= px.choropleth_mapbox(
-            data_frame=df2_2[df2_2['stk_flow'] ==impexp],
+            data_frame=df2_pivot,
             geojson=euro_map,
             width=Width,
             height=Height,
@@ -230,17 +221,17 @@ def update_graph(year_slctd,country_slctd, impexp,year_slctd2):
             center={"lat": 56, "lon": 10},
             zoom=2.5,
             opacity=0.9,
-            color=year_slctd,
+            color=impexp,
             mapbox_style="carto-positron",
-            hover_data=['name',year_slctd],
+            hover_data=['name',impexp],
             color_continuous_scale=px.colors.sequential.BuGn,
             #labels={'Name':'Thousands Euro'},
             #template='seaborn'
         )
     else:
-        df2_2.sort_values(by=[year_slctd], axis=0, ascending=False, inplace=True)
+        df2_pivot.sort_values(by=[impexp], axis=0, ascending=False, inplace=True)
         fig_map= px.choropleth_mapbox(
-            data_frame=df2_2[df2_2['stk_flow'] ==impexp],
+            data_frame=df2_pivot,
             geojson=euro_map,
             width=Width,
             height=Height,
@@ -249,9 +240,9 @@ def update_graph(year_slctd,country_slctd, impexp,year_slctd2):
             center={"lat": 56, "lon": 10},
             zoom=2.5,
             opacity=0.9,
-            color=year_slctd,
+            color=impexp,
             mapbox_style="carto-positron",
-            hover_data=['name',year_slctd],
+            hover_data=['name',impexp],
             color_continuous_scale=px.colors.sequential.BuPu,
             #labels={'Name':'Thousands Euro'},
             #template='seaborn'
@@ -259,54 +250,42 @@ def update_graph(year_slctd,country_slctd, impexp,year_slctd2):
 
     # Bar figures--------------------------------------------------------
     if impexp == "REV":
-        df3_3.sort_values(by=[year_slctd], axis=0, ascending=False, inplace=True)
+        df2_pivot.sort_values(by=[impexp], axis=0, ascending=False, inplace=True)
         fig2 = px.bar(
-        df3_3[df3_3["stk_flow"]==impexp],
+        df2_pivot,
         width=Width,
         height=Height,
         x='name', 
-        y=year_slctd,
-        color=year_slctd,
+        y=impexp,
+        color=impexp,
         labels={year_slctd:'Thousands Euro'}, 
         color_continuous_scale=px.colors.diverging.PRGn,
-
         color_continuous_midpoint=0,
-
         title= 'Ranking (thousand Euro)',
         template='plotly_white'
         )
 
     elif impexp == "EXP":
 
-        df2_2.sort_values(by=[year_slctd], axis=0, ascending=False, inplace=True)
-
-        # data_exp = data[(data['stk_flow']=="EXP")&(data['nace_r2']==nace_r2)&(data['unit']=="THS_EUR")&(data['name']==country_slctd)]
-        # data_exp.sort_values(by=[year2], axis=0, ascending=False, inplace=True)
-
-        
+        df2_pivot.sort_values(by=[impexp], axis=0, ascending=False, inplace=True)
         fig2 = px.histogram(
-        df2_2[df2_2['stk_flow'] ==impexp],
+        df2_pivot,
         width=Width,
         height=Height,
         x='name', 
-        y=year_slctd,
+        y=impexp,
         labels={year_slctd:'Thousands Euro'}, 
         color_discrete_sequence=['green'], 
         title= 'Exporting countries',
         template='plotly_white')
     else:
-        df2_2.sort_values(by=[year_slctd], axis=0, ascending=False, inplace=True)
-
-
-    # data_imp = data[(data['stk_flow']=="IMP")&(data['nace_r2']==nace_r2)&(data['unit']=="THS_EUR")&(data['name']==country_slctd)]
-    # data_imp.sort_values(by=[year2], axis=0, ascending=False, inplace=True)
-
+        df2_pivot.sort_values(by=[impexp], axis=0, ascending=False, inplace=True)
         fig2 = px.histogram(
-        df2_2[df2_2['stk_flow'] ==impexp], 
+        df2_pivot, 
         width=Width,
         height=Height,
         x='name', 
-        y=year_slctd,
+        y=impexp,
         labels={year_slctd:'Thousands Euro'}, 
         color_discrete_sequence=['purple'], 
         title= 'Importing countries',
