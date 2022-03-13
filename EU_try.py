@@ -1,36 +1,24 @@
-from gc import callbacks
-from os import path
-from turtle import width
-import pandas as pd # primary data structure library
-import numpy as np  # scientific computing in Python
-import matplotlib.pyplot as plt # scientific graph plotting
-from matplotlib.pyplot import figure
+import pandas as pd
 import plotly.express as px
-import urllib
 import json
-
-#Trying without geopandas
-import geopandas as gpd
-from geopandas import GeoDataFrame
-
-#Dashboard libraries
 import dash
 from dash import html, dcc, Input, Output
-#import  dash_core_components as dcc
-#import dash_html_components as html
 import dash_bootstrap_components as dbc
 import eurostat
+
+#DATA IMPORT
 nace_dict = json.load(open("nace.json","r"))
 iso_to_iso = json.load(open("iso_to_iso.json","r"))
 iso_to_name = json.load(open("iso_to_name.json","r"))
 euro_map = json.load(open("europe.json","r"))
+#Data ext_tec01
 df2   =eurostat.get_data_df("ext_tec01", flags=False)
 df2.rename({r'geo\time': 'iso2'}, axis='columns', inplace=True)
-df2.iloc[:,5].replace({"UK":"GB","EL":"GR"}, inplace=True)
-df2 = df2[df2.iloc[:,5]!="XK"]
+df2['iso2'].replace({"UK":"GB","EL":"GR"}, inplace=True)
+df2 = df2[df2['iso2']!="XK"]
 df2['ISO3'] = df2.iloc[:,5].map(iso_to_iso)
 df2['name'] = df2.iloc[:,5].map(iso_to_name)
-
+#Data ext_tec03
 data = eurostat.get_data_df('ext_tec03', flags=False)
 data.rename({r'geo\time': 'iso2'}, axis='columns', inplace=True)
 data['iso2'].replace({"UK":"GB","EL":"GR"}, inplace=True)
@@ -153,7 +141,7 @@ app.layout = html.Div([
                     {"label":"Unknown NACE activity","value": "UNK"}], 
                     value= 'TOTAL')]),
             html.Br(),
-            html.Div(children=[
+            html.Div(id="map_div",children=[
                 html.Div([
                     dcc.Graph(id='map_product', figure={})])])
         ]),
@@ -318,8 +306,7 @@ def update_graph(year_slctd,country_slctd, impexp,year_slctd2):
 
     return fig_map,fig2,fig3,fig4
 
-@app.callback(
-    [Output(component_id='map_product', component_property='figure')],
+@app.callback(Output(component_id='map_product', component_property='figure'),
 
     [Input(component_id='Year_product',component_property='value'),
     Input(component_id='ImpExp_product',component_property='value'),
@@ -328,45 +315,35 @@ def update_graph(year_slctd,country_slctd, impexp,year_slctd2):
 def trade_graph(year,imp_exp,industry):
     unit = "THS_EUR"
     sizeclas = "TOTAL"
-    stk_flow = imp_exp
-    
     partner = "WORLD"
     df2_2 = df2[(df2['unit']==unit)&(df2["sizeclas"] ==sizeclas)&(df2['partner'] ==partner)&(df2['nace_r2'] ==industry)]
+    df2_pivot = df2_2.pivot(index=['ISO3',"name"], columns="stk_flow", values=year)
+    df2_pivot["REV"] = df2_pivot["EXP"]-df2_pivot["IMP"]
+    df2_pivot.reset_index(inplace=True)   
+    
     if imp_exp == "REV":
-        df2_2.sort_values(by=["iso2","stk_flow"], axis=0, ascending=False, inplace=True)
-        df2_2_imp = df2_2[df2_2["stk_flow"]=="IMP"]
-        df2_2_exp = df2_2[df2_2["stk_flow"]=="EXP"]
-        d3_4 = []
-        for i in range(34):
-            dict4 = {"unit":"THS_EUR","sizeclas":"TOTAL","stk_flow":"REV","nace_r2":industry,"partner":"WORLD"}
-            dict4['iso2'] = df2_2_exp.iloc[i,5]
-            dict5  = dict(df2_2_exp.iloc[i,6:15] - df2_2_imp.iloc[i,6:15])
-            dict4 = dict4 | dict5
-            dict4["ISO3"] = df2_2_exp.iloc[i,15]
-            dict4["name"] = df2_2_exp.iloc[i,16]
-            d3_4.append(dict4)
-        df3_3 = pd.DataFrame.from_dict(d3_4)
-        fig_map= px.choropleth_mapbox(df3_3,
+        
+        fig_map= px.choropleth_mapbox(df2_pivot,
             geojson=euro_map,
             width=Width,
             height=Height,
             locations='ISO3',
-            title= 'Trading amount from %s' %industry,
+            title= 'Trading amount (thousand Euro)',
             center={"lat": 56, "lon": 10},
             zoom=2.5,
             opacity=0.9,
-            color=year,
+            color=imp_exp,
             mapbox_style="carto-positron",
-            hover_data=['name',year],
+            hover_data=['name',imp_exp],
             color_continuous_scale=px.colors.diverging.PRGn,
             color_continuous_midpoint=0,
             #labels={'Name':'Thousands Euro'},
             #template='seaborn'
         )
     elif imp_exp == "EXP":
-        df2_2.sort_values(by=[year], axis=0, ascending=False, inplace=True)
+        df2_pivot.sort_values(by=[imp_exp], axis=0, ascending=False, inplace=True)
         fig_map= px.choropleth_mapbox(
-            data_frame=df2_2[df2_2['stk_flow'] ==imp_exp],
+            data_frame=df2_pivot,
             geojson=euro_map,
             width=Width,
             height=Height,
@@ -375,17 +352,17 @@ def trade_graph(year,imp_exp,industry):
             center={"lat": 56, "lon": 10},
             zoom=2.5,
             opacity=0.9,
-            color=year,
+            color=imp_exp,
             mapbox_style="carto-positron",
-            hover_data=['name',year],
+            hover_data=['name',imp_exp],
             color_continuous_scale=px.colors.sequential.BuGn,
             #labels={'Name':'Thousands Euro'},
             #template='seaborn'
         )
     else:
-        df2_2.sort_values(by=[year], axis=0, ascending=False, inplace=True)
+        df2_pivot.sort_values(by=[imp_exp], axis=0, ascending=False, inplace=True)
         fig_map= px.choropleth_mapbox(
-            data_frame=df2_2[df2_2['stk_flow'] ==imp_exp],
+            data_frame=df2_pivot,
             geojson=euro_map,
             width=Width,
             height=Height,
@@ -394,13 +371,14 @@ def trade_graph(year,imp_exp,industry):
             center={"lat": 56, "lon": 10},
             zoom=2.5,
             opacity=0.9,
-            color=year,
+            color=imp_exp,
             mapbox_style="carto-positron",
-            hover_data=['name',year],
+            hover_data=['name',imp_exp],
             color_continuous_scale=px.colors.sequential.BuPu,
             #labels={'Name':'Thousands Euro'},
             #template='seaborn'
         )
+
     return fig_map
 #-----------------------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
