@@ -1,0 +1,366 @@
+*{
+    margin: 0;
+    padding: 20;
+    font-family: 'Roboto', sans-serif;
+}
+.header{
+    min-height: 100vh;
+    width: 100%;
+    background-image: linear-gradient(rgba(4,9,30,0.7),rgba(4,9,30,0.7)),url(https://aer.eu/wp-content/uploads/2021/07/About-AER-.jpg);
+    background-position: center;
+    background-size: cover;
+    position: relative;
+}
+.nav a h2{
+    margin-bottom: 0%;
+    color:gray;
+    flex:1;
+    text-decoration: none;
+    list-style: none;
+    content: '';
+}
+.nav{
+    display: flex;
+    padding: 2% 6%;
+    justify-content: space-between;
+    align-items: center;
+}
+.nav img{
+    width: 250px;
+
+}
+
+.nav a:link{
+    color:gray;
+    text-decoration: none;
+}
+
+.nav-links{
+    flex: 1;
+    text-align: right;
+    color:white;
+
+}
+.nav ul li{
+    list-style: none;
+    display: inline-block;
+    padding: 8px 12px;
+    position: relative;
+    color:white;
+    text-decoration: none;
+    font-size: 23px;
+}
+.nav a ul li a{
+    list-style: none;
+    display: inline-block;
+    padding: 8px 12px;
+    position: relative;
+    color:white;
+    text-decoration: none;
+    font-size: 23px;
+}
+.nav ul li::after{
+    content: '';
+    width: 0%;
+    height: 2px;
+    background: #87cfff;
+    display:block;
+    margin:auto;
+    transition: 0.5s;
+}
+.nav ul li:hover::after{
+    width: 100%;
+
+}
+.nav h2{
+    font-size: small;
+    color:azure;
+}
+.nav i{
+    display: none;
+}
+.text-box{
+    width:90%;
+    color:white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    text-align: center;
+    font-family: 'Roboto', sans-serif;
+}
+.text-box h1{
+    font-size: 62px;
+}
+.text-box p{
+    margin: 10px 0 0px;
+    font-size: 20px;
+    color:white;
+}
+.btn-github{
+    display: inline-block;
+    margin: 10px 0 0px;
+    text-decoration: none;
+    color:white;
+    padding: 12px 49px;
+    background:transparent;
+    border: 1px solid white;
+    font-size: 15px;
+    text-align: center;
+    position: relative;
+    cursor: pointer;
+    justify-content: space-between;
+    margin: 1%;
+}
+.btn-github:hover{
+    background:#87cfff;
+    border: 1px solid #87cfff;
+    transition: 1s;
+}
+.git-logo{
+
+    height: 100%;
+    position: absolute;
+    align-items: center;
+    bottom:0;
+    right:0;
+}
+
+
+@media(max-width: 700px){
+    .text-box h1{
+        font-size: 220px;
+    }
+    .nav ul li{
+        display: block;
+        background: #f44336;
+    }
+    .nav ul li{
+        position:absolute;
+        height: 100px;
+        width: 200px;
+        background: #f44336;
+        top:0;
+        right:0;
+        text-align: left;
+        z-index: 2;
+    }
+    .nav i{
+        display: block;
+        color:white;
+    }
+    .row{
+        flex-direction: column;
+    }
+}
+
+#ranking_chart,#imp-exp-perc,#imp-pie,#exp-pie{
+    height: 500px;
+    border: 1px solid black !important;
+    background-color: #ebeae8;
+    padding:0px !important;
+}
+#trading_map,#imp-exp-prod{
+    height: 1000px;
+    border: 1px solid black !important;
+    background-color: #ebeae8;
+    padding:0px !important;
+
+}
+.plot1{
+    background-color: #777;
+}
+.col-md-12{
+    padding: 0 !important;
+}
+/*--
+.graph{
+    height:100%;
+    width:100%;
+    padding: 0px;
+    background-color: aliceblue;
+}
+/*------about-----
+
+.about-page{
+    min-height: 10vh;
+    width: 100%;
+    margin: auto;
+    text-align: center;
+    padding-top: 1px; 
+    background: #343436;
+}
+*/
+/*.row{
+    margin-top:1%;
+    display: flex;
+    justify-content: space-between;
+    text-align: center; 
+    font-weight: 500;
+    margin: 50px 0 0; 
+    padding: 0; 
+    position: relative;
+    border-bottom: 1px solid $border; 
+    z-index: 1;
+}
+.course-col{
+    font-weight: bold !important;
+    padding-top: 13px !important;
+    text-align: center !important;
+    background: #fff !important;
+    color: #000 !important;
+    border-radius: 30px !important;
+    height: 100px !important;
+}
+.course-col-select{
+    background: #343436 !important;
+    color: #fff !important;
+}
+*/
+
+/*.course-col{
+    font-size: 15px;
+    flex-basis: 100%;
+    background: #87cfff;
+    margin: 1%;
+    display: flex;
+    justify-content: space-between;
+    border-radius: 10px;
+    margin-bottom: 1%;
+    padding: 10px 12px;
+    box-sizing: border-box;
+    transition: 0.5s;
+    color:white;
+    text-decoration: none;
+}
+
+.course-col a{
+    color:white;
+    text-decoration: none;
+}
+.course-col:hover{
+    box-shadow: 0 0 20px 0px rgba(0,0,0.1);
+}*/
+
+/*------plot1-----
+.plot1{
+    min-height: 90vh;
+    width: 100%;
+    margin-top: 0px;
+    text-align: left;
+    padding-top: 10px;
+    background: white;
+    color: black;
+}
+*/
+
+/*
+.plot1{
+    display:grid;
+    grid-template-columns: 1fr 3fr 3fr 3fr;
+    grid-template-rows: 2fr 2fr 2fr;
+    min-height: 100vh;
+    width:100%
+}
+.grid-span-2{
+    grid-column: span 2;
+    grid-row: span 2;
+}
+
+.country-2{
+    grid-row-start: 3 !important;
+    padding: 0;
+    margin-top: 0;
+}
+.product{
+    grid-row-start: 3 !important;
+    padding: 0;
+    margin-top: 0;
+}
+.SideBar{
+    display:grid;
+    grid-column-start: 1;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 16rem;
+    padding: 2rem 1rem;
+    background-color: #f8f9fa;
+}
+
+
+
+.graph-plot{
+    position: relative;
+    top:0;
+    margin-left: 18rem;
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr);
+    background: white !important;
+
+}
+
+
+.grid-span-2{
+    grid-column: span 2;
+    grid-row: span 2;
+    width: 30%;
+}
+.grid-span-half{
+    grid-column: span 0.5;
+    grid-row-start: 4;
+
+}*/
+/* 
+.ImpExp{
+    display: grid !important;
+    gap: 1.5rem !important;
+    grid-template-columns: 1fr 1fr 1fr;
+    font-size: 20px;
+    width: 30%;
+    vertical-align: middle;
+    padding: 8px;
+    cursor: pointer;
+    margin-right: 0px;
+    color: #fff;
+    background-color: lightgray;
+    border-bottom: 1px solid $border;
+}
+.graph-plot1{
+    display:grid !important;
+    gap:1.5rem !important;
+    grid-template-columns: 1fr 1fr !important;
+    border-bottom: 1px solid $border;
+}
+.dropdown{
+    font-weight: 200;
+    font-size: 14px;
+    line-height: 12px;
+    color: black;
+    margin: 0;
+    padding: 8px;
+    background: rgba(0,0,0,0);
+    position: relative;
+    display: inline-block;
+    width: 50%;
+    vertical-align: middle;
+}
+.card{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    word-wrap: break-word;
+    background-color: #fff;
+    background-clip: border-box;
+    border: 0 solid #d9dee3;
+    border-radius: 0.5rem;
+}*/
+/*    display:grid !important;
+    gap:1.5rem !important;
+    grid-template-columns: 1fr 1fr 1fr!important;
+    width: 100%;
+    vertical-align: middle;
+    border-bottom: 1px solid $border;
+    border: black;
+}*/
